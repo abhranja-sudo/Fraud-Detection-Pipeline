@@ -19,7 +19,7 @@ def acked(err, msg):
 
 def start_producing(messages):
     producer = Producer(conf)
-    for i in range(200):
+    for i in range(len(messages)):
         message_id = str(uuid.uuid4())
         message = {'request_id': message_id, 'data': json.loads(messages[i])}
 
