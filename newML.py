@@ -77,13 +77,35 @@ def check_testing_set () :
 
 
 def check_testing_set_2 () :
+    from pyspark.sql import SparkSession
+
+    spark = (SparkSession
+             .builder
+             .master('local')
+             .appName('TEST')
+             .getOrCreate())
     producer = joblib.load('new_testing_set.pkl')
-    answer  = json.loads(open('data/transactions/2022-05-09.json', 'r').read())
+    answer  = json.loads(open('data/transactions/2022-05-12.json', 'r').read())
     import pandas as pd
     df = pd.DataFrame(answer)
 
     print(producer.shape)
     print(df.shape)
+    # df = df.applymap(str)
+    # from pyspark.ml.evaluation import BinaryClassificationEvaluator
+    # newDf = spark.createDataFrame(df)
+    # evaluator = BinaryClassificationEvaluator(labelCol="TX_FRAUD", rawPredictionCol="prediction")
+    # newDf = newDf.to_pandas_on_spark()
+    # newDf['TX_FRAUD'] = newDf['TX_FRAUD'].astype(float)
+    # newDf['prediction'] = newDf['prediction'].astype(float)
+    # print(newDf['prediction'])
+    # accuracy = evaluator.evaluate(newDf.to_spark())
+    # print("Accuracy = %s" % (accuracy))
+    # print("Test Error = %s" % (1.0 - accuracy))
+    # daataa = {
+    #     'accuracy' : accuracy,
+    #     'error' : (1.0 - accuracy)
+    # }
 
     # def func (series) :
     #     actual_series = None
@@ -97,6 +119,8 @@ def check_testing_set_2 () :
     #         return 1
     #
     # a = df.apply(func, axis =1 )
+
+    print(df[df['TX_FRAUD'] == df['prediction']][['prediction','TRANSACTION_ID','TX_FRAUD']])
 
     # print(a)
     # print(producer)

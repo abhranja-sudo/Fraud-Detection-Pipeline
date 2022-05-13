@@ -5,20 +5,26 @@ import socket
 import uuid
 import json
 import threading
+from dotenv import load_dotenv
+from datetime import datetime
+from os import path
+import os
 
+load_dotenv()
 
-KAFKA_HOST = '0.0.0.0:29092'
+KAFKA_HOST = os.getenv('KAFKA_HOST')
 conf = {'bootstrap.servers': KAFKA_HOST,
         'client.id': socket.gethostname(),
-        'group.id': "foo",
+        'group.id': os.getenv('GROUP_ID'),
         'auto.offset.reset': 'smallest'}
 
-TOPIC_TRANSACTIONS = 'transactions'
-TOPIC_PREDICTIONS = 'predictions'
+TOPIC_TRANSACTIONS = os.getenv('TOPIC_TRANSACTIONS')
+TOPIC_PREDICTIONS = os.getenv('TOPIC_PREDICTIONS')
 
-testing_set_results = []
+testing_set_results = {}
 last_message_id = ''
-testing_set = joblib.load('new_testing_set.pkl')
+
+testing_set = joblib.load('../new_testing_set.pkl')
 testing_set['json'] = testing_set.apply(lambda x: x.to_json(), axis=1)
 
 messages = testing_set.json.tolist()
@@ -26,13 +32,18 @@ messages = testing_set.json.tolist()
 def acked(err, msg):
     if err is not None:
         print("Failed to deliver message: %s: %s" % (str(msg), str(err)))
-    else:
-        print("Message produced: %s" % (str(msg)))
+    # else:
+    #     print("Message produced: %s" % (str(msg)))
 
 def start_producing():
-    producer = Producer(conf)
+    global started_at
     global testing_set_results
     global last_message_id
+
+    started_at = datetime.now()
+
+    producer = Producer(conf)
+
     for i in range(len(messages)):
         message_id = str(uuid.uuid4())
 
@@ -43,51 +54,52 @@ def start_producing():
 
         d = json.loads(messages[i])
         d['request_id'] = message_id
-
-        testing_set_results.append(d)
+        d['sent_request_at'] = datetime.now()
+        testing_set_results[d['request_id']] = d
 
         producer.produce(TOPIC_TRANSACTIONS, json.dumps(message).encode('utf-8'), callback=acked)
         producer.flush()
 
         print("\033[1;31;40m -- PRODUCER: Sent message with id {}".format(message_id))
-        # producer.poll(1)
-        # producer.poll(1)
+        producer.poll(0.009)
 
-    print('PRODUCED ALL THE MOTHERFUCKING DATA')
+    print('PRODUCED ALL THE DATA', len(messages))
 
 running = True
-MIN_COMMIT_COUNT = 55000
+MIN_COMMIT_COUNT = 1
 latest_file_datetime = None
 latest_datetime = None
-from datetime import datetime
-from os import path
-
+count = 0
 
 def addPredictionToResults(message) :
     global testing_set_results
     global latest_file_datetime
+    global count
+    global started_at
 
-    for index,test in enumerate(testing_set_results) :
-        if test['request_id'] == message['request_id'] :
-            testing_set_results[index]['prediction'] = message['fraud']
+    print(count)
+    if message['request_id'] not in testing_set_results :
+        return
 
-            latest_file_datetime = str(datetime.now().date())
+    testing_set_results[message['request_id']]['prediction'] = 1 if message['fraud'] else 0
+    testing_set_results[message['request_id']]['recieved_response_at'] = datetime.now()
+    # testing_set_results[message['request_id']]['sent_request_at'] = str(testing_set_results[message['request_id']]['sent_request_at'])
 
+    count += 1
+    if message['request_id'] == last_message_id:
+        diff = datetime.now() - started_at
+        print('Throughput of the pipeline is', len(list(testing_set_results.keys()))/diff.total_seconds(),'requests/second')
 
-            if path.isfile('transactions/' + latest_file_datetime + ".json"):
-                to_dump = json.loads(open('transactions/' + latest_file_datetime + '.json', "r+").read())
-            else:
-                to_dump = []
-
-            to_dump.append(testing_set_results[index])
-
-            f = open('transactions/' + latest_file_datetime + '.json', "w+")
-            json.dump(to_dump, f)
-            f.close()
-
-            break
-
-
+        keys = list(testing_set_results.keys())
+        latency = 0
+        for i in range(3500,len(keys)) :
+            key = keys[i]
+            if 'recieved_response_at' in testing_set_results[key] :
+                latency += (testing_set_results[key]['recieved_response_at'] -
+                            testing_set_results[key]['sent_request_at']).total_seconds()
+            if i == len(keys)-1:
+                print((testing_set_results[key]['recieved_response_at'] - testing_set_results[key]['sent_request_at']).total_seconds())
+        print('Average Latency' , latency/(len(keys)-3500))
 
 def getPrediction():
     consumer = Consumer(conf)
@@ -110,9 +122,10 @@ def getPrediction():
                 message = json.loads(message)
                 if 'fraud' not in message :
                     continue
-                addPredictionToResults(message)
                 print("\033[1;31;40m Received message with id {} and fraud = {}".format(message['request_id'], message['fraud']))
-                # msg_process(msg)
+
+                addPredictionToResults(message)
+
                 msg_count += 1
                 if msg_count % MIN_COMMIT_COUNT == 0:
                     consumer.commit(asynchronous=True)
@@ -130,6 +143,7 @@ if __name__ == '__main__':
 
     threads.append(t)
     threads.append(t2)
-    t.start()
     t2.start()
+    t.start()
+
 
