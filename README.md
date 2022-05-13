@@ -23,7 +23,9 @@ To test the application run the following commands.
         bin/zookeeper-server-start.sh config/zookeeper.properties
         
 * Open other terminal, run
+
         bin/kafka-server-start.sh config/server.properties
+        
         
 * Create two topics with the below commands
 
