@@ -53,7 +53,7 @@
        pip install -r requirements.txt 
 
 
-* Go inside the below directory
+* Go inside the below directory from base project folder
 
        cd FraudDetectionService/InitializeModel
        
