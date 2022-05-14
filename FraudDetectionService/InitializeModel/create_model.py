@@ -3,20 +3,12 @@ import os
 from pathlib import Path
 from pyspark.sql import SparkSession
 import pyspark.pandas as ps
-import pandas as pd
-import numpy as np
-import math
-import sys
 import joblib
 import time
-import pickle
 import json
 import datetime
-import random
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from utilities import read_from_files, scaleData
-import sklearn
-from sklearn import *
 import pyspark.ml as ml
 from pyspark.ml.feature import StringIndexer
 from pyspark.pandas.config import set_option, reset_option

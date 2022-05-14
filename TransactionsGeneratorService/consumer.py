@@ -1,12 +1,8 @@
 import sys
 import joblib
-from confluent_kafka import Producer, Consumer, KafkaError, KafkaException
+from confluent_kafka import Consumer, KafkaError, KafkaException
 import socket
-import uuid
 import json
-import threading
-from datetime import datetime
-from os import path
 import os
 from dotenv import load_dotenv
 import time
