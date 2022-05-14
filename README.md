@@ -1,6 +1,10 @@
 # Fraud Detection Pipeline
 
 
+## Requirements 🔧
+* Spark 3.2
+* Python 3.9(don't run on 3.10 as confluent kafka client is not supported)
+
 
 ## Running The Application 🔌
 
@@ -42,6 +46,12 @@
  
         
 ### Starting Pipeline
+
+* Create a new Environment and run the below command
+
+       cd Fraud-Detection-Pipeline
+       pip install -r requirements.txt 
+
 
 * Go inside the below directory
 
