@@ -41,7 +41,7 @@
 
        https://drive.google.com/file/d/1dk7XPEG972WI_17brOxARNnW4TbvRoTD/view?usp=sharing 
      
-* unzip the file and place the data package under /Fraud-Detection-Pipeline/data (data folder will need to be created and placed under project)
+* unzip the file and place the extracted package  under /Fraud-Detection-Pipeline/data (data folder may need to be created if project is downloaded from git)
      
  
         
@@ -55,21 +55,28 @@
 
 * Go inside the below directory
 
-       cd Fraud-Detection-Pipeline/FraudDetectionService/InitializeModel
+       cd FraudDetectionService/InitializeModel
+       
  
 * Run the below command to create a Initailize ML model
 
         python create_model.py
+        
+* Wait until the model is created(can take upto 1-2 min)
 
-* Go inside the below directory
+* To Run the Fraud Detection Engine, From the base proect directory
 
-       cd Fraud-Detection-Pipeline/TransactionsGeneratorService
+       cd FraudDetectionService
+       python fraud_detection_engine.py  
 
-* Run the below command in seperate terminal to run the consumer
 
+* Run the below command in seperate terminal from the base project directory to run the consumer
+
+       cd TransactionsGeneratorService
        python consumer.py
 
 
-* Run the below command in seperate terminal to start app that will start producing messages
+* Run the below command in seperate terminal from the base directory to start app that will start producing messages
 
+       cd TransactionsGeneratorService
        python app.py
