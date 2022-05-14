@@ -17,7 +17,7 @@ KAFKA_HOST = os.getenv('KAFKA_HOST')
 conf = {'bootstrap.servers': KAFKA_HOST,
         'client.id': socket.gethostname(),
         'group.id': os.getenv('GROUP_ID'),
-        'auto.offset.reset': 'latest'}
+        'auto.offset.reset': 'smallest'}
 
 TOPIC_TRANSACTIONS = os.getenv('TOPIC_TRANSACTIONS')
 TOPIC_PREDICTIONS = os.getenv('TOPIC_PREDICTIONS')
@@ -35,63 +35,40 @@ def acked(err, msg):
     else:
         print("Message produced: %s" % (str(msg)))
 
-def start_producing():
-    producer = Producer(conf)
-    global testing_set_results
-    global last_message_id
-
-    # started_at = datetime.now()
-
-    for i in range(len(messages)):
-        message_id = str(uuid.uuid4())
-        json_object = json.loads(messages[i])
-        json_object['is_last_message'] = False
-
-        if i == len(messages)-1 :
-            last_message_id = message_id
-            json_object['is_last_message'] = True
-
-        json_object['sent_request_at'] = math.ceil(time.time())
-        message = {'request_id': message_id, 'data': json_object}
-
-        training_set_json = json.loads(messages[i])
-        training_set_json['request_id'] = message_id
-
-        testing_set_results.append(training_set_json)
-
-        producer.produce(TOPIC_TRANSACTIONS, json.dumps(message).encode('utf-8'), callback=acked)
-        producer.flush()
-
-        print("\033[1;31;40m -- PRODUCER: Sent message with id {}".format(message_id))
-
-        producer.poll(0.015)
-
-    print('PRODUCED ALL THE MOTHERFUCKING DATA')
-
 running = True
 MIN_COMMIT_COUNT = 1
 latest_file_datetime = None
 latest_datetime = None
 count = 0
 
-def addPredictionToResults(message) :
+def addPredictionToResults(message, recieved_at) :
     global testing_set_results
     global latest_file_datetime
     global last_message_id
     global count
 
-    for index,test in enumerate(testing_set_results) :
-        if test['request_id'] == message['request_id'] :
-            testing_set_results[index]['prediction'] = 1 if message['fraud'] else 0
+    transaction = message["data"]
+    transaction["recieved_at"] = recieved_at
+    testing_set_results.append(transaction)
+    latency = 0
+    if transaction['is_last_message'] :
+        diff = recieved_at - testing_set_results[0]['sent_request_at']
+        print(diff,len(testing_set_results))
 
-            latest_file_datetime = str(datetime.now().date())
-            count += 1
-            break
+        print('Throughput', len(testing_set_results)/diff)
 
-    if message['request_id'] == last_message_id :
-        f = open('../data/transactions/' + latest_file_datetime + '.json', "w+")
-        json.dump(testing_set_results, f)
-        f.close()
+        for i in range(3500,len(testing_set_results)) :
+            result = testing_set_results[i]
+            if 'recieved_at' in result :
+                latency += (result['recieved_at'] -
+                            result['sent_request_at'])
+            if i == len(testing_set_results)-1:
+                print((result['recieved_at'] - result['sent_request_at']))
+        print('Average Latency' , latency/(len(testing_set_results)-3500))
+    # if message['request_id'] == last_message_id :
+    #     f = open('../data/transactions/' + latest_file_datetime + '.json', "w+")
+    #     json.dump(testing_set_results, f)
+    #     f.close()
 
 def getPrediction():
     consumer = Consumer(conf)
@@ -115,8 +92,7 @@ def getPrediction():
                 if 'fraud' not in message :
                     continue
                 print("\033[1;31;40m Received message with id {} and fraud = {}".format(message['request_id'], message['fraud']))
-
-                addPredictionToResults(message)
+                addPredictionToResults(message, math.ceil(time.time()))
 
                 msg_count += 1
                 if msg_count % MIN_COMMIT_COUNT == 0:
@@ -127,12 +103,5 @@ def getPrediction():
         consumer.close()
 
 if __name__ == '__main__':
-    threads = []
-    t = threading.Thread(target=start_producing)
-    # t2 = threading.Thread(target=getPrediction)
-
-    threads.append(t)
-    # threads.append(t2)
-    t.start()
-    # t2.start()
+    getPrediction()
 

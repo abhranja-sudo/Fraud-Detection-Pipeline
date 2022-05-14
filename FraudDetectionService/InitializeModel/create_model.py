@@ -40,7 +40,6 @@ input_features=['TX_AMOUNT','TX_DURING_WEEKEND', 'TX_DURING_NIGHT', 'CUSTOMER_ID
 def initialize():
     print("Create data folder if it does not exist")
     (PATH).mkdir(exist_ok=True)
-    # (MODELS_PATH).mkdir(exist_ok=True)
 
 def get_train_test_set(transactions_df,
                        start_date_training,
@@ -129,7 +128,6 @@ def fit_model_and_get_predictions(train_df, test_df,
     prediction_execution_time = time.time() - start_time
 
     testing_set_to_write = create_testing_set(predictions_test)
-    # testing_set_to_write = predictions_test
 
     joblib.dump(testing_set_to_write.to_pandas(), '../../new_testing_set.pkl')
 
@@ -180,7 +178,9 @@ if __name__ == '__main__':
 
     set_option("compute.ops_on_diff_frames", True)
     test_df['pred'] = model_and_predictions_dictionary['predictions_test']['prediction']
+
     print('ML model has been created')
+
     #Write test results to a file
     # results = open('../test_results.json', "w+")
     # joblib.dump((test_df.to_pandas()), 'test_results.pkl')

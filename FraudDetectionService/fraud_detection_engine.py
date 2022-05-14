@@ -10,13 +10,12 @@ import time
 import pyspark.pandas as ps
 import pyspark.ml as ml
 from datetime import datetime
-from utilities import read_from_files, scaleData
+from utilities import scaleData
 
 KAFKA_HOST = '0.0.0.0:29092'
 
 producer_conf = {'bootstrap.servers': KAFKA_HOST,
-        'group.id': "foo",
-        'auto.offset.reset': 'smallest'}
+}
 
 
 TOPIC_TRANSACTIONS = "transactions"
@@ -56,10 +55,14 @@ def msg_process(msg):
     producer = Producer(producer_conf)
 
     prediction = msg['prediction']
+    data = msg['data']
+    del data['rawPrediction']
+    del data['probability']
     if(prediction == 1):
-        messageToSend = {'request_id': msg['request_id'], 'fraud': 'True'}
+        messageToSend = {'request_id': msg['request_id'],'data':data ,'fraud': 'True'}
     else:
-        messageToSend = {'request_id': msg['request_id'], 'fraud': 'False'}
+        messageToSend = {'request_id': msg['request_id'], 'data':data ,'fraud': 'False'}
+
     producer.produce('predictions', json.dumps(messageToSend).encode('utf-8'), callback=acked)
     producer.flush()
 
@@ -70,14 +73,14 @@ def msg_process(msg):
 def get_prediction(df) :
     global classifier
 
-    initial_features = input_features[:] + ['request_id']
+    initial_features = input_features[:] + ['request_id','sent_request_at','is_last_message']
     select_features = initial_features[:]
     select_features = select_features + ['rawPrediction',
                        'prediction', 'probability']
 
     df = df.to_spark().select(initial_features).to_pandas_on_spark()
 
-    (train_df,df) = scaleData(df, df, input_features)
+    df = scaleData(df, input_features)
     predictions_test = classifier.transform(df)
     predictions_test = ((predictions_test.select(select_features)).to_pandas_on_spark())
     return predictions_test
@@ -100,7 +103,7 @@ def create_df(batch_df) :
 def send_message(row) :
     global count
     count += 1
-    msg_process({"prediction": row['prediction'], "request_id": row['request_id']})
+    msg_process({"prediction": row['prediction'], "request_id": row['request_id'], "data" : row.to_dict()})
 
 total_events = 0
 
