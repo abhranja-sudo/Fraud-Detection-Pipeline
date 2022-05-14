@@ -39,6 +39,27 @@
      
 * unzip the file and place the data folder under /Fraud-Detection-Pipeline/data
      
- * To run the application, go inside project directory
+ 
+        
+### Starting Pipeline
 
-        cd Fraud-Detection-Pipeline
+* Go inside the below directory
+
+       cd Fraud-Detection-Pipeline/FraudDetectionService/InitializeModel
+ 
+* Run the below command to create a Initail ML model
+
+        python create_model.py
+
+* Go inside the below directory
+
+       cd Fraud-Detection-Pipeline/TransactionsGeneratorService
+
+* Run the below command in seperate terminal to run the consumer
+
+       python consumer.py
+
+
+* Run the below command in seperate terminal to start app that will start producing messages
+
+       python app.py
