@@ -1,18 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-from pyspark.sql.types import StructType, LongType
-from pyspark.ml.feature import Normalizer, StandardScaler
-import random
-import sys, socket, uuid, json, random, time, os, pyspark.pandas as ps
-from confluent_kafka import Consumer, KafkaError, KafkaException, Producer
-from pyspark.sql import functions as F
-import time
+import socket, json
+from confluent_kafka import Producer
 import pyspark.pandas as ps
 import pyspark.ml as ml
-from datetime import datetime
-from utilities import read_from_files, scaleData
+from utilities import scaleData
 
-KAFKA_HOST = '0.0.0.0:29092'
+KAFKA_HOST = '0.0.0.0:9092'
 conf = {'bootstrap.servers': KAFKA_HOST,
         'client.id': socket.gethostname(),
         }
