@@ -33,7 +33,7 @@
         kafka-topics --create --partitions 1 --replication-factor 1 --topic predictions --bootstrap-server localhost:9092
         
  
- * Download the repository files (project) from the download section or clone this project by typing in the bash the following command:
+ * Open the project folder that has been submitted or can be cloned by the link below
 
        git clone https://github.com/abhranja-sudo/Fraud-Detection-Pipeline.git
        
@@ -57,7 +57,7 @@
 
        cd Fraud-Detection-Pipeline/FraudDetectionService/InitializeModel
  
-* Run the below command to create a Initail ML model
+* Run the below command to create a Initailize ML model
 
         python create_model.py
 
