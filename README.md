@@ -15,7 +15,7 @@
 * To Run Kafka Server locally, issue the below commands (credit: https://kafka.apache.org/quickstart )
 
         tar -xzf kafka_2.12-3.1.1.tgz
-        cd kafka_2.13-3.1.1-SNAPSHOT
+        cd kafka_2.12-3.1.1
         bin/zookeeper-server-start.sh config/zookeeper.properties
         
 * Open other terminal, run
