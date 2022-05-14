@@ -18,12 +18,12 @@
         cd kafka_2.12-3.1.1
         bin/zookeeper-server-start.sh config/zookeeper.properties
         
-* Open other terminal, run
+* Open other terminal, run inside kafka_2.12-3.1.1 directory
 
         bin/kafka-server-start.sh config/server.properties
         
         
-* Create two topics with the below commands
+* Open another terminal, run the below command to create two new topics
 
         kafka-topics --create --partitions 1 --replication-factor 1 --topic transactions --bootstrap-server localhost:9092
         kafka-topics --create --partitions 1 --replication-factor 1 --topic predictions --bootstrap-server localhost:9092
