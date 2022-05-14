@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 import time
 import math
+
 load_dotenv()
 
 KAFKA_HOST = os.getenv('KAFKA_HOST')
@@ -66,13 +67,14 @@ def start_producing():
 
         producer.poll(0.015)
 
-    print('PRODUCED ALL THE MOTHERFUCKING DATA')
+    print('PRODUCED THE DATA')
 
 running = True
 MIN_COMMIT_COUNT = 1
 latest_file_datetime = None
 latest_datetime = None
 count = 0
+
 
 def addPredictionToResults(message) :
     global testing_set_results
@@ -127,12 +129,5 @@ def getPrediction():
         consumer.close()
 
 if __name__ == '__main__':
-    threads = []
-    t = threading.Thread(target=start_producing)
-    # t2 = threading.Thread(target=getPrediction)
-
-    threads.append(t)
-    # threads.append(t2)
-    t.start()
-    # t2.start()
+    start_producing()
 

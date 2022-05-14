@@ -5,8 +5,11 @@ import pyspark.pandas as ps
 import pyspark.ml as ml
 from datetime import datetime
 from utilities import scaleData
+from dotenv import load_dotenv
 
-KAFKA_HOST = '0.0.0.0:9092'
+load_dotenv()
+
+KAFKA_HOST = os.getenv('KAFKA_HOST')
 
 producer_conf = {'bootstrap.servers': KAFKA_HOST,
 }

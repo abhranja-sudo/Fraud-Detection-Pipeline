@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 import time
 import math
+import pandas as pd
+
 load_dotenv()
 
 KAFKA_HOST = os.getenv('KAFKA_HOST')
@@ -37,6 +39,11 @@ latest_file_datetime = None
 latest_datetime = None
 count = 0
 
+def visualize_data() :
+    global testing_set_results
+    df = pd.DataFrame(testing_set_results)
+    print(df['request_id','TRANSACTION_ID','TX_FRAUD', 'prediction'])
+
 def addPredictionToResults(message, recieved_at) :
     global testing_set_results
     global latest_file_datetime
@@ -48,8 +55,7 @@ def addPredictionToResults(message, recieved_at) :
     testing_set_results.append(transaction)
     latency = 0
     if transaction['is_last_message'] :
-        diff = recieved_at - testing_set_results[0]['sent_request_at']
-        print(diff,len(testing_set_results))
+        diff = recieved_at - testing_set_results[int(len(testing_set_results)/2)]['sent_request_at']
 
         print('Throughput', len(testing_set_results)/diff)
 
@@ -61,6 +67,7 @@ def addPredictionToResults(message, recieved_at) :
             if i == len(testing_set_results)-1:
                 print((result['recieved_at'] - result['sent_request_at']))
         print('Average Latency' , latency/(len(testing_set_results)-3500))
+        visualize_data()
     # if message['request_id'] == last_message_id :
     #     f = open('../data/transactions/' + latest_file_datetime + '.json', "w+")
     #     json.dump(testing_set_results, f)

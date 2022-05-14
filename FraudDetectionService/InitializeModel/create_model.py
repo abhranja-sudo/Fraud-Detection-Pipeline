@@ -137,7 +137,7 @@ def fit_model_and_get_predictions(train_df, test_df,
 
 def create_testing_set(test_df) :
     fraud_df = test_df[test_df['prediction'] == 1]
-    non_fraud_df = test_df[test_df['prediction'] == 0 ].iloc[:15000,:]
+    non_fraud_df = test_df[test_df['prediction'] == 0 ].iloc[:5000,:]
     final_df = ps.concat([fraud_df,non_fraud_df])
     return final_df
 
