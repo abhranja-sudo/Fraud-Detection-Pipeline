@@ -41,7 +41,7 @@
 
        https://drive.google.com/file/d/1dk7XPEG972WI_17brOxARNnW4TbvRoTD/view?usp=sharing 
      
-* unzip the file and place the data folder under /Fraud-Detection-Pipeline/data
+* unzip the file and place the data package under /Fraud-Detection-Pipeline/data (data folder will need to be created and placed under project)
      
  
         
