@@ -47,7 +47,7 @@
         
 ### Starting Pipeline
 
-* Create a new Environment and run the below command
+* Create a new Conda Environment and run the below command
 
        cd Fraud-Detection-Pipeline
        pip install -r requirements.txt 
