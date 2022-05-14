@@ -5,16 +5,12 @@
 ## Running The Application 🔌
 
 
-To test the application run the following commands.
-
-* Download the repository files (project) from the download section or clone this project by typing in the bash the following command:
-
-       git clone https://github.com/abhranja-sudo/Fraud-Detection-Pipeline.git
+### Kafka Setup
        
+* Download the Kafka setup from below link
 
-* To run the application, go inside project directory
+       https://drive.google.com/file/d/1FECUBb853MUVoWnMo--4bU_Tbo7Zv9kg/view?usp=sharing
 
-        cd Fraud-Detection-Pipeline
         
 * To Run Kafka Server locally, issue the below commands (credit: https://kafka.apache.org/quickstart )
 
@@ -31,3 +27,12 @@ To test the application run the following commands.
 
         kafka-topics --create --partitions 1 --replication-factor 1 --topic transactions --bootstrap-server localhost:9092
         kafka-topics --create --partitions 1 --replication-factor 1 --topic predictions --bootstrap-server localhost:9092
+        
+        
+ * Download the repository files (project) from the download section or clone this project by typing in the bash the following command:
+
+       git clone https://github.com/abhranja-sudo/Fraud-Detection-Pipeline.git
+     
+ * To run the application, go inside project directory
+
+        cd Fraud-Detection-Pipeline
